@@ -3,6 +3,21 @@ JSON Schema HTML Documentation Generator
 
 A flexible solution for auto-generating HTML API documentation from JSON-schemas that take advantage of the v4 Hyper-Schema definition. To use this package, you must have at least one valid JSON-schema file, preferably one that implements the `links` definition of the Hyper-Schema spec.
 
+## Changes by AfterShip ##
+
+- Added a config object that allows examples to be output to file. This makes it easy to load the examples with Prism.js and get correct indentation. 
+- Added a lot of template helpers that helps us to generate the desired docs. The [handlebars-helpers](https://github.com/assemble/handlebars-helpers) by Assemble is used ([docs](http://assemble.io/helpers/)). 
+- Updated Handlebars to `3.0.1`.
+
+Custom helpers:
+
+- `debug`: output a variable as JSON.
+- `objectLink`: creates a link to a given object definition.
+- `printEnum`: outputs enum types.
+- `printParam`: similar to `printEnum` but takes a single argument instead of an array.
+
+All helpers can be found at `lib/helpers/template-helpers.js`. The helpers are registered in `lib/helpers/generate-flow.js`.
+
 ## What this package provides ##
 For each `link` of a given schema, "endpoint" properties are added to the `link` definition, and provides additional data to be used for documentation purposes:
 
@@ -26,8 +41,9 @@ To get started, you'll need to `json-schema-docs` config to your `package.json`.
 - `noDocs`: An array of schema IDs that should no have documentation generated for it. This is useful if you're including all docs by default, but some schemas are just a basis for others and don't need HTML documentation.
 - `templates`: An array of globs to resolve that will collect Handlebars template files
 - `templateOptions`: An object that will be passed in along with every page template that is generated. Useful for storing version numbers, or other metadata about your docs that you don't want to hard code in the template files.
-- `dist`: The directory/path where generated HTML files should be saved
+- `destination`: The directory/path where generated HTML files should be saved
 - `pages`: An object where the key represents the HTML file name and the value is an array of schema IDs that should be included on that page. Optionally, a string of "*" can be used to include all schemas. (e.g., `{"index": "*"}`)
+- `examples`: (Added by Aftership) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
 
 ### Example configuration ###
 Below is an example configuration in your `package.json`:
@@ -43,13 +59,13 @@ Below is an example configuration in your `package.json`:
       "schemas/wip/work-in-progress-schema.json"
     ],
     "endpointOptions": {
-      "attributes": ["title", "description", "method", "my_attribute_on_link_objects"],
+      "attributes": ["id", "title", "method"],
       "attributeParameters": [
         "name",
         "type",
         "description",
-        "example",
-        "my_attribute_on_attribute_definitions"
+        "default",
+        "enum"
       ],
       "curlHeaders": {
         "X-Auth-Token": "c2547eb745079dac9320b638f5e225cf483cc5cfdda41"
@@ -60,14 +76,11 @@ Below is an example configuration in your `package.json`:
       "/helpers/helper-schema2",
     ],
     "templates": [
-      "source/templates/*.handlebars"
+      "source/templates/*.hbs"
     ],
-    "destination": "./htdocs",
+    "destination": "./public",
     "pages": {
-      "index": [
-        "/schema1-identifier",
-        "/schema2-identifier"
-      ]
+      "index": "*"
     }
   }
 }

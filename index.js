@@ -27,6 +27,10 @@ var _ = require('lodash'),
 		// the example objects
 		includeAdditionalProperties : true
 	},
+	examplesDefaults = {
+		outputToFile: false,
+		outputFolder: 'examples/docs/'
+	},
 	// constructor
 	Generator = function (options, flags) {
 		options = options || {};
@@ -65,6 +69,7 @@ _.extend(proto, {
 		// Each endpoint section will get these parameters
 		// for the template
 		this.endpointOptions = _.defaults({}, options.endpointOptions, endpointOptionDefaults);
+		this.examplesOptions = _.defaults({}, options.examples, examplesDefaults);
 		// Additional template parameters for each page.
 		// Here might be a good place to configure things like an API version, or any global
 		// variables you want accessible inside of your templates
@@ -274,6 +279,7 @@ _.extend(proto, {
 	buildEndpoint : function (schema, link) {
 		var options = this.endpointOptions,
 			defaults = _.pick(link, options.attributes),
+			examples = this.examplesOptions,
 			// Allow each link/endpoint to override headers required for the request
 			curlHeaders = this.buildExampleData(
 				schema,
@@ -281,7 +287,7 @@ _.extend(proto, {
 				_.extend({preserveCase: true}, options)
 			);
 
-		return _.extend(defaults, {
+		var endpoint = _.extend(defaults, {
 			id : this._sanitizeHTMLAttributeValue(schema.title+'-'+defaults.title),
 			uri : this.resolveURI(link.href, schema.id),
 			parameters : this.buildEndpointParameterMap(link),
@@ -293,6 +299,25 @@ _.extend(proto, {
 			),
 			response : this._stringifyData(this.buildExampleData(schema, link.targetSchema), true)
 		});
+
+		if (examples.outputToFile) {
+			this.createExampleFile(endpoint, 'response', 'js');
+			this.createExampleFile(endpoint, 'curl', 'js');
+		}
+
+		return endpoint;
+	},
+
+	// Create example files for i.e. response and curl for an endpoint.
+	// Using Prism.js for syntax highlighting these files can loaded
+	// and highlighted with correct indentation.
+	//
+	// @param endpoint - A processed endpoint object
+	// @param slug - The object key to output from the endpoint
+	// @param ext - File extension to output file as
+	// @return undefined - Returns nothing
+	createExampleFile: function(endpoint, slug, ext) {
+		fs.writeFileSync(this.examplesOptions.outputFolder + slug + '/' + slug + '_' + endpoint.id +'.' + ext, endpoint[slug]);
 	},
 
 	// Build a map of each property in the schema that can be output
