@@ -43,7 +43,8 @@ To get started, you'll need to `json-schema-docs` config to your `package.json`.
 - `templateOptions`: An object that will be passed in along with every page template that is generated. Useful for storing version numbers, or other metadata about your docs that you don't want to hard code in the template files.
 - `destination`: The directory/path where generated HTML files should be saved
 - `pages`: An object where the key represents the HTML file name and the value is an array of schema IDs that should be included on that page. Optionally, a string of "*" can be used to include all schemas. (e.g., `{"index": "*"}`)
-- `examples`: (Added by Aftership) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
+- `examples`: (Added in fork) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
+- `dataOptions`: (Added in fork) An object with one key: `differentiateEndpoints`. Set to true to group the schemas into two different groups. One for endpoints and one for domainObjects without resource endpoints. 
 
 ### Example configuration ###
 Below is an example configuration in your `package.json`:

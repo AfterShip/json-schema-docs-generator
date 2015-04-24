@@ -27,6 +27,10 @@ var _ = require('lodash'),
 		// the example objects
 		includeAdditionalProperties : true
 	},
+	dataOptionsDefaults = {
+		// Set to true to to split definitions into "endpoints" and "domainObjects"
+		differentiateEndpoints: false
+	},
 	examplesDefaults = {
 		outputToFile: false,
 		outputFolder: 'examples/docs/'
@@ -70,6 +74,7 @@ _.extend(proto, {
 		// for the template
 		this.endpointOptions = _.defaults({}, options.endpointOptions, endpointOptionDefaults);
 		this.examplesOptions = _.defaults({}, options.examples, examplesDefaults);
+		this.dataOptions = _.defaults({}, options.dataOptions, dataOptionsDefaults);
 		// Additional template parameters for each page.
 		// Here might be a good place to configure things like an API version, or any global
 		// variables you want accessible inside of your templates
@@ -174,11 +179,20 @@ _.extend(proto, {
 	// @return object - HTML contents, keyed by page basename
 	makeHTML : function (templates, schemas) {
 		var sections = this.buildSchemaDocObjects(schemas);
+		var _this = this;
 
 		return _.reduce(this.pages, function(acc, includeSchemas, page){
 			var template = templates[page];
-			acc[page] = template(_.extend({}, this.templateOptions, {
-				sections: this.getSectionsForPage(sections, includeSchemas)
+			var pageSections = this.getSectionsForPage(sections, includeSchemas);
+
+			if (_this.dataOptions.differentiateEndpoints) {
+				pageSections = _.groupBy(sections, function(section) {
+					return (section.endpoints && section.endpoints.length > 0) ? 'endpoints':'domainObjects';
+				});
+			}
+
+			acc[page] = template(_.extend({}, _this.templateOptions, {
+				sections: pageSections
 			}));
 			return acc;
 		}, {}, this);
