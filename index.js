@@ -185,12 +185,6 @@ _.extend(proto, {
 			var template = templates[page];
 			var pageSections = this.getSectionsForPage(sections, includeSchemas);
 
-			if (_this.dataOptions.differentiateEndpoints) {
-				pageSections = _.groupBy(sections, function(section) {
-					return (section.endpoints && section.endpoints.length > 0) ? 'endpoints':'domainObjects';
-				});
-			}
-
 			acc[page] = template(_.extend({}, _this.templateOptions, {
 				sections: pageSections
 			}));
@@ -218,10 +212,18 @@ _.extend(proto, {
 			return _.contains(include, section._id);
 		});
 
-		return _.reduce(include, function (acc, schemaID) {
+		var onlySpecifiedSections = _.reduce(include, function (acc, schemaID) {
 			acc.push(_.detect(includeSections, function (section) { return section._id === schemaID; }));
 			return acc;
 		}, []);
+
+		if (this.dataOptions.differentiateEndpoints) {
+			onlySpecifiedSections = _.groupBy(includeSections, function(section) {
+				return (section.endpoints && section.endpoints.length > 0) ? 'endpoints':'domainObjects';
+			});
+		}
+
+		return onlySpecifiedSections;
 	},
 
 	// Expects to resolve a relative URI from the given schema ID
