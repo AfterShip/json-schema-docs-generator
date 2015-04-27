@@ -329,11 +329,11 @@ _.extend(proto, {
 	// and highlighted with correct indentation.
 	//
 	// @param endpoint - A processed endpoint object
-	// @param slug - The object key to output from the endpoint
+	// @param subfolder - A subfolder in which to place a sub set of examples
 	// @param ext - File extension to output file as
 	// @return undefined - Returns nothing
-	createExampleFile: function(endpoint, slug, ext) {
-		fs.writeFileSync(this.examplesOptions.outputFolder + slug + '/' + slug + '_' + endpoint.id +'.' + ext, endpoint[slug]);
+	createExampleFile: function(endpoint, subfolder, ext) {
+		fs.writeFileSync(this.examplesOptions.outputFolder + subfolder + '/' + subfolder + '_' + endpoint.id +'.' + ext, endpoint[subfolder]);
 	},
 
 	// Build a map of each property in the schema that can be output
