@@ -204,7 +204,9 @@ _.extend(proto, {
 		var includeSections = [];
 		// Special case for all schemas on one page.
 		// NOTE: No guarantee of order here.
-		if (include === '*') {return sections;}
+		if (include === '*') {
+			return this.groupSectionByLinks(sections);
+		}
 
 		// Specifically doing this in order so the schemas that should be included
 		// are return in their configured order.
@@ -217,13 +219,18 @@ _.extend(proto, {
 			return acc;
 		}, []);
 
+
+		return this.groupSectionByLinks(onlySpecifiedSections);
+	},
+
+	groupSectionByLinks: function(sections) {
 		if (this.dataOptions.differentiateEndpoints) {
-			onlySpecifiedSections = _.groupBy(includeSections, function(section) {
+			var groupedSections =  _.groupBy(sections, function(section) {
 				return (section.endpoints && section.endpoints.length > 0) ? 'endpoints':'domainObjects';
 			});
+			return groupedSections;
 		}
-
-		return onlySpecifiedSections;
+		return sections;
 	},
 
 	// Expects to resolve a relative URI from the given schema ID
