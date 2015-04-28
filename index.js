@@ -28,12 +28,20 @@ var _ = require('lodash'),
 		includeAdditionalProperties : true
 	},
 	dataOptionsDefaults = {
-		// Set to true to to split definitions into "endpoints" and "domainObjects"
+		// Set to true to split definitions into "endpoints" and "domainObjects"
 		differentiateEndpoints: false
 	},
 	examplesDefaults = {
 		outputToFile: false,
 		outputFolder: 'examples/docs/'
+	},
+	templateOptionsDefaults = {
+		// Refers to a template name without path and extension
+		// The name with longest path will match. e.g:
+		// 'subfolder/index.hbs' will match 'index'
+		// if both 'index.hbs' and 'subfolder/index.hbs' exists,
+		// 'subfolder/index.hbs' will be used
+		defaultTemplate: 'index'
 	},
 	// constructor
 	Generator = function (options, flags) {
@@ -79,7 +87,7 @@ _.extend(proto, {
 		// Additional template parameters for each page.
 		// Here might be a good place to configure things like an API version, or any global
 		// variables you want accessible inside of your templates
-		this.templateOptions = options.templateOptions;
+		this.templateOptions = _.defaults({}, options.templateOptions, templateOptionsDefaults);
 		// Default curl command format.
 		this.curl = options.curl || '$ curl -X';
 		// Ability to create multiple HTML doc packages, and override every option needed
@@ -133,6 +141,7 @@ _.extend(proto, {
 	//
 	// @return Promise
 	parseTemplates : function () {
+		var _this = this;
 		return new Promise(function (resolve, reject) {
 			getFiles.raw(this.templates).bind(this).then(function (templates) {
 				// Order the templates by key length. This solves an issue
@@ -144,6 +153,12 @@ _.extend(proto, {
 				});
 				templates = _.sortBy(templates, function (config) {
 					return config.path.length;
+				});
+
+				// Save a fallback template to use if a page doesn't match
+				// any template.
+				var fallbackTemplate = _.find(templates, function(tpl) {
+					return tpl.path === _this.templateOptions.defaultTemplate;
 				});
 
 				// Map file name to contents
@@ -184,6 +199,9 @@ _.extend(proto, {
 
 		return _.reduce(this.pages, function(acc, includeSchemas, page){
 			var template = templates[page];
+			if (!template && _this.templateOptions.defaultTemplate) {
+				template = templates[_this.templateOptions.defaultTemplate];
+			}
 			var pageSections = this.getSectionsForPage(sections, includeSchemas);
 
 			acc[page] = template(_.extend({}, _this.templateOptions, {
@@ -203,23 +221,38 @@ _.extend(proto, {
 	// @return array - array of sections
 	getSectionsForPage : function (sections, include) {
 		var includeSections = [];
+		var _this = this;
 		// Special case for all schemas on one page.
 		// NOTE: No guarantee of order here.
 		if (include === '*') {
 			return this.groupSectionByLinks(sections);
 		}
 
+		var getWildcardSections = function(schemaID, section) {
+			// normalize the id and remove any slashes
+			schemaID = schemaID.replace('*', '').replace('/', '');
+			var shouldInclude = _.contains(section._id, schemaID);
+			return shouldInclude;
+		};
+
 		// Specifically doing this in order so the schemas that should be included
 		// are return in their configured order.
 		includeSections = _.filter(sections, function (section) {
+			if (_.contains(include, '*')) {
+				return getWildcardSections(include, section);
+			}
 			return _.contains(include, section._id);
 		});
+
+		// If using a wildcard string, we can safely return the sections here
+		if (_.contains(include, '*')) {
+			return this.groupSectionByLinks(includeSections);
+		}
 
 		var onlySpecifiedSections = _.reduce(include, function (acc, schemaID) {
 			acc.push(_.detect(includeSections, function (section) { return section._id === schemaID; }));
 			return acc;
 		}, []);
-
 
 		return this.groupSectionByLinks(onlySpecifiedSections);
 	},
