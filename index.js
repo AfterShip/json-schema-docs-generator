@@ -46,6 +46,7 @@ var _ = require('lodash'),
 		};
 	},
 	proto = {};
+var mkdirp = require('mkdirp');
 
 module.exports = Generator;
 Generator.prototype = proto;
@@ -340,7 +341,20 @@ _.extend(proto, {
 	// @param ext - File extension to output file as
 	// @return undefined - Returns nothing
 	createExampleFile: function(endpoint, subfolder, ext) {
-		fs.writeFileSync(this.examplesOptions.outputFolder + subfolder + '/' + subfolder + '_' + endpoint.id +'.' + ext, endpoint[subfolder]);
+
+		var filename = subfolder + '_' + endpoint.id +'.' + ext;
+		var pathname =  path.join(this.examplesOptions.outputFolder, subfolder);
+
+		// Recursively mkdir, like mkdir -p
+		mkdirp.sync(pathname, function (err) {
+			if (err) {
+				console.error(err);
+			} else {
+				var full_filename = path.join(pathname, filename);
+				fs.writeFileSync(full_filename, endpoint[subfolder]);
+			}
+		});
+
 	},
 
 	// Build a map of each property in the schema that can be output
