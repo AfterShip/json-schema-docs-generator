@@ -100,7 +100,8 @@ _.extend(proto, {
 	resolvePaths : function () {
 		return Promise.props({
 			schemas: this.parseSchemas(),
-			templates: this.parseTemplates()
+			templates: this.parseTemplates(),
+			data: this.getPageData()
 		});
 	},
 
@@ -188,12 +189,24 @@ _.extend(proto, {
 		}, {}, this);
 	},
 
+	getPageData: function() {
+		return new Promise(function (resolve, reject) {
+			if (this.templateOptions && this.templateOptions.dataFile) {
+				var fileName = this.templateOptions.dataFile;
+				getFiles.asJSON([fileName]).bind(this).then(function(result) {
+					resolve( result[fileName] );
+				});
+			} else {
+				resolve({});
+			}
+		}.bind(this));
+	},
 	// Build the objects needed for the template and
 	// create the configured HTML files
 	//
 	// @param templates object - Map of templates, keyed by file name
 	// @return object - HTML contents, keyed by page basename
-	makeHTML : function (templates, schemas) {
+	makeHTML : function (templates, schemas, pagedata) {
 		var sections = this.buildSchemaDocObjects(schemas);
 		var _this = this;
 
@@ -205,7 +218,8 @@ _.extend(proto, {
 			var pageSections = this.getSectionsForPage(sections, includeSchemas);
 
 			acc[page] = template(_.extend({}, _this.templateOptions, {
-				sections: pageSections
+				sections: pageSections,
+				pagedata: pagedata[page]
 			}));
 			return acc;
 		}, {}, this);

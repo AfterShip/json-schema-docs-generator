@@ -50,6 +50,29 @@ To get started, you'll need to `json-schema-docs` config to your `package.json`.
 - `noDocs`: An array of schema IDs that should no have documentation generated for it. This is useful if you're including all docs by default, but some schemas are just a basis for others and don't need HTML documentation.
 - `templates`: An array of globs to resolve that will collect Handlebars template files
 - `templateOptions`: An object that will be passed in along with every page template that is generated. Useful for storing version numbers, or other metadata about your docs that you don't want to hard code in the template files.
+- `templateOptions.dataFile`: (Added in fork) The path to a `.json` file containing custom variables for pages. The json file should have an object keyed for each page:
+
+```javascript
+// In package.json
+"templateOptions": {
+  "dataFile": "path/to/data.json"
+},
+"pages": {
+  "index": ...,
+  "about": ...
+}
+
+// In data.json
+{
+  "index": {
+    "title": "Home page"
+  },
+  "about": {
+    "title": "About page"
+  }
+}
+```
+
 - `destination`: The directory/path where generated HTML files should be saved
 - `pages`: An object where the key represents the HTML file name and the value is an array of schema IDs that should be included on that page. Optionally, a string of "*" can be used to include all schemas. (e.g., `{"index": "*"}`)
 - `examples`: (Added in fork) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
