@@ -6,24 +6,26 @@ A flexible solution for auto-generating HTML API documentation from JSON-schemas
 ## Changes in this fork ##
 
 - Added a config object that allows examples to be output to file. This makes it easy to load the examples with Prism.js and get correct indentation. 
-- Added a lot of template helpers that helps us to generate the desired docs. The [handlebars-helpers](https://github.com/assemble/handlebars-helpers) by Assemble is used ([docs](http://assemble.io/helpers/)). 
 - Updated Handlebars to `3.0.1`.
 - `defaultTemplate` on the `templateOptions`. Lets you specify a default template to use for pages which doesn't have a template that corresponds with the page key. Useful for generating different pages with the same template but with only a subset of the schemas.
 - Added support for using a simple wildcard when assigning schemas for a page. The wildcard should be the last part of the schema id.
+- Added support for custom `templateHelpers`. Each template helper file should export a function that takes `_` and `Handlebars` as arguments:
+
+```javascript
+var moduleWrapper = function(_, Handlebars) {
+  var helpers = { ... }
+  return helpers;
+};
+module.exports = function(_, Handlebars) {
+  return moduleWrapper(_,Handlebars);
+};
+```
+
 ```json
 "pages": {
   "mypage": "schemaid-*"
 }
 ```
-
-Custom helpers:
-
-- `debug`: output a variable as JSON.
-- `objectLink`: creates a link to a given object definition.
-- `printEnum`: outputs enum types.
-- `printParam`: similar to `printEnum` but takes a single argument instead of an array.
-
-All helpers can be found at `lib/helpers/template-helpers.js`. The helpers are registered in `lib/helpers/generate-flow.js`.
 
 ## What this package provides ##
 For each `link` of a given schema, "endpoint" properties are added to the `link` definition, and provides additional data to be used for documentation purposes:
@@ -51,7 +53,8 @@ To get started, you'll need to `json-schema-docs` config to your `package.json`.
 - `destination`: The directory/path where generated HTML files should be saved
 - `pages`: An object where the key represents the HTML file name and the value is an array of schema IDs that should be included on that page. Optionally, a string of "*" can be used to include all schemas. (e.g., `{"index": "*"}`)
 - `examples`: (Added in fork) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
-- `dataOptions`: (Added in fork) An object with one key: `differentiateEndpoints`. Set to true to group the schemas into two different groups. One for endpoints and one for domainObjects without resource endpoints. 
+- `dataOptions`: (Added in fork) An object with one key: `differentiateEndpoints`. Set to true to group the schemas into two different groups. One for endpoints and one for domainObjects without resource endpoints.
+- `templateHelpers`: (Added in fork) An array of paths to helpers that will be used in the templates. 
 
 ### Example configuration ###
 Below is an example configuration in your `package.json`:
@@ -103,4 +106,3 @@ A `bin` file comes packaged, but you can always write your own `bin` file to ove
 
 ## To-dos ##
 1. TESTS!
-2. Better handling of page info for generating navigation across page templates
