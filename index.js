@@ -117,7 +117,8 @@ _.extend(proto, {
 
 			getFiles.asJSON(files).bind(this).then(function(files){
 				// Pass back schema map..
-				resolve(_.reduce(files, function(acc, schema){
+				resolve(_.reduce(files, function(acc, schema, key){
+					schema.filepath = key;
 					acc[schema.id] = schema;
 					return acc;
 				}, {}, this));
@@ -239,13 +240,25 @@ _.extend(proto, {
 		// Special case for all schemas on one page.
 		// NOTE: No guarantee of order here.
 		if (include === '*') {
+			// Find one of the schemas in the schema src folder
+			var schemaInRootFolder = _.min(sections, function(section) {
+				section._folderDepth = section.filepath.split('/').length;
+				return section._folderDepth;
+			});
+			var minDepth = schemaInRootFolder._folderDepth;
+
+			// Only allow schemas in the root schema folder
+			sections = _.filter(sections, function(section) {
+				return (section._folderDepth === minDepth);
+			});
+			
 			return this.groupSectionByLinks(sections);
 		}
 
 		var getWildcardSections = function(schemaID, section) {
 			// normalize the id and remove any slashes
-			schemaID = schemaID.replace('*', '').replace('/', '');
-			var shouldInclude = _.contains(section._id, schemaID);
+			var includePathName = schemaID.replace('*','');
+			var shouldInclude = _.startsWith(section.filepath, includePathName)
 			return shouldInclude;
 		};
 

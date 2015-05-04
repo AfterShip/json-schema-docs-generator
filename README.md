@@ -27,6 +27,18 @@ module.exports = function(_, Handlebars) {
 }
 ```
 
+- Changed the way schemas are assigned to pages. Since we have a lot of schemas with the same ID, I've changed to use the filepath rather than the id to determine if a schema should be included on a page or not. This assumes that all schemas are stored in the same folder. Example:
+
+```javascript
+"schemas": [
+  "schemas/**/*.json"
+],
+"pages": {
+  "index": "*", // Include all schemas. But only the ones in the root of the schema folder
+  "other": "schemas/other/*" // Include all schemas within the "other" subfolder. This is a quick and dirty hack, use the path relative to the root folder rather than the schema folder root.
+}
+```
+
 ## What this package provides ##
 For each `link` of a given schema, "endpoint" properties are added to the `link` definition, and provides additional data to be used for documentation purposes:
 
