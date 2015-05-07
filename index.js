@@ -217,10 +217,15 @@ _.extend(proto, {
 				template = templates[_this.templateOptions.defaultTemplate];
 			}
 			var pageSections = this.getSectionsForPage(sections, includeSchemas);
+			pagedata[page].tplName = page;
 
 			acc[page] = template(_.extend({}, _this.templateOptions, {
 				sections: pageSections,
-				pagedata: pagedata[page]
+				pagedata: pagedata[page],
+				global: {
+					pages: _this.pages,
+					pagedata: pagedata
+				}
 			}));
 			return acc;
 		}, {}, this);
