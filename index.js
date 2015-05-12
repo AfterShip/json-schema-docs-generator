@@ -411,7 +411,7 @@ _.extend(proto, {
 		var pathname =  path.join(this.examplesOptions.outputFolder, subfolder);
 
 		// Recursively mkdir, like mkdir -p
-		mkdirp.sync(pathname, function (err) {
+		mkdirp(pathname, function (err) {
 			if (err) {
 				console.error(err);
 			} else {
