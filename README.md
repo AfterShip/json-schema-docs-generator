@@ -1,11 +1,12 @@
 JSON Schema HTML Documentation Generator
 =========================================
 
-A flexible solution for auto-generating HTML API documentation from JSON-schemas that take advantage of the v4 Hyper-Schema definition. To use this package, you must have at least one valid JSON-schema file, preferably one that implements the `links` definition of the Hyper-Schema spec.
+A flexible solution for auto-generating HTML API documentation from JSON-schemas that take advantage of the v6 Hyper-Schema definition. To use this package, you must have at least one valid JSON-schema file, preferably one that implements the `links` definition of the Hyper-Schema spec.
 
 ## Changes in this fork ##
 
-- Added a config object that allows examples to be output to file. This makes it easy to load the examples with Prism.js and get correct indentation. 
+- Updated to work with draft-06 json-schema
+- Added a config object that allows examples to be output to file. This makes it easy to load the examples with Prism.js and get correct indentation.
 - Updated Handlebars to `3.0.1`.
 - `defaultTemplate` on the `templateOptions`. Lets you specify a default template to use for pages which doesn't have a template that corresponds with the page key. Useful for generating different pages with the same template but with only a subset of the schemas.
 - Added support for using a simple wildcard when assigning schemas for a page. The wildcard should be the last part of the schema id.
@@ -89,7 +90,7 @@ To get started, you'll need to `json-schema-docs` config to your `package.json`.
 - `pages`: An object where the key represents the HTML file name and the value is an array of schema IDs that should be included on that page. Optionally, a string of "*" can be used to include all schemas. (e.g., `{"index": "*"}`)
 - `examples`: (Added in fork) An object to determine how to handle the examples. The object have two keys: `outputToFile`(defaults to `false`) and `outputFolder`(defaults to `examples/docs/`).
 - `dataOptions`: (Added in fork) An object with one key: `differentiateEndpoints`. Set to true to group the schemas into two different groups. One for endpoints and one for domainObjects without resource endpoints.
-- `templateHelpers`: (Added in fork) An array of paths to helpers that will be used in the templates. 
+- `templateHelpers`: (Added in fork) An array of paths to helpers that will be used in the templates.
 
 ### Example configuration ###
 Below is an example configuration in your `package.json`:

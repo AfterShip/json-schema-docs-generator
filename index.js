@@ -119,7 +119,7 @@ _.extend(proto, {
 				// Pass back schema map..
 				resolve(_.reduce(files, function(acc, schema, key){
 					schema.filepath = key;
-					acc[schema.id] = schema;
+					acc[schema.$id] = schema;
 					return acc;
 				}, {}, this));
 			}, reject);
@@ -256,7 +256,7 @@ _.extend(proto, {
 			sections = _.filter(sections, function(section) {
 				return (section._folderDepth === minDepth);
 			});
-			
+
 			return this.groupSectionByLinks(sections);
 		}
 
@@ -332,11 +332,11 @@ _.extend(proto, {
 	buildSchemaDocObjects : function (schemas) {
 		return _.compact(_.map(schemas, function (schema) {
 			// Don't generate docs for these items
-			if (_.include(this.noDocs, schema.id)) { return false; }
+			if (_.include(this.noDocs, schema.$id)) { return false; }
 
 			return _.extend({}, schema, {
 				// Save the real ID for mapping
-				_id : schema.id,
+				_id : schema.$id,
 				// This ID can ba used as the id attribute of the API section
 				id : this._sanitizeHTMLAttributeValue(schema.title || ''),
 				// An array of endpoints available to the schema
@@ -378,10 +378,10 @@ _.extend(proto, {
 
 		var endpoint = _.extend(defaults, {
 			id : this._sanitizeHTMLAttributeValue(schema.title+'-'+defaults.title),
-			uri : this.resolveURI(link.href, schema.id),
+			uri : this.resolveURI(link.href, schema.$id),
 			parameters : this.buildEndpointParameterMap(link),
 			curl : this.buildCurl(
-				this.resolveURI(link.href, schema.id, true),
+				this.resolveURI(link.href, schema.$id, true),
 				link.method,
 				curlHeaders,
 				link.schema_example_data || this.buildExampleData(schema, link.schema)
@@ -471,7 +471,7 @@ _.extend(proto, {
 					val = obj.hasOwnProperty('example') ? obj.example : obj.default;
 					// If the definition references a schema (or array of schemas),
 					// go fetch the example data for it.
-					if (!val && obj.id) {
+					if (!val && obj.$id) {
 						val = this.buildExampleData(obj, obj);
 					}
 
@@ -695,7 +695,7 @@ _.extend(proto, {
 
 		// In the event that we pass a full schema object,
 		// replace whatever the root is, because we are now changing context
-		if (schema.id) {
+		if (schema.$id) {
 			root = schema;
 		}
 
@@ -766,7 +766,7 @@ _.extend(proto, {
 				example = [config.items.example || this.buildExampleData(root, config.items)];
 			// The property definition is referencing a schema
 			// and we don't already have an example
-			} else if (config.id && !example) {
+		} else if (config.$id && !example) {
 				example = this.buildExampleData(config, config);
 			// Nested objects
 			} else if (config.properties) {
