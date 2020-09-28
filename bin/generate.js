@@ -10,7 +10,7 @@ var Generator = require('../index');
 var _ = require('lodash');
 
 // !Better way to get this?
-var mainConfig = require('../../../../package')['json-schema-docs'];
+var mainConfig = require('../../../package')['json-schema-docs'];
 var generate = require('../lib/helpers/generate-flow');
 
 domain.on('error', function (err) {
