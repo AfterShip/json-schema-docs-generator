@@ -26,3 +26,10 @@ node_modules
 
 # Jetbrains IDE stuff
 .idea/
+
+
+# ------------------------------------------------------------------------------
+# for aftership-publish making use of https://github.com/inikulin/publish-please
+# ------------------------------------------------------------------------------
+.publishrc
+.npmignore
